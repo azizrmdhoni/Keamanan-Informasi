@@ -1,0 +1,15 @@
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\bin\Debug\net10.0\DataMahasiswa.exe
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\bin\Debug\net10.0\DataMahasiswa.deps.json
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\bin\Debug\net10.0\DataMahasiswa.runtimeconfig.json
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\bin\Debug\net10.0\DataMahasiswa.dll
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\bin\Debug\net10.0\DataMahasiswa.pdb
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.AssemblyInfoInputs.cache
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.AssemblyInfo.cs
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.csproj.CoreCompileInputs.cache
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.sourcelink.json
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.dll
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\refint\DataMahasiswa.dll
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.pdb
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\DataMahasiswa.genruntimeconfig.cache
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\DataMahasiswa\obj\Debug\net10.0\ref\DataMahasiswa.dll

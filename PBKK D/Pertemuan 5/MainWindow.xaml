@@ -1,0 +1,174 @@
+<Window x:Class="CampusRoster.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Data Mahasiswa" Height="720" Width="1100" MinWidth="900"
+        WindowStartupLocation="CenterScreen" Background="#F4F6F8">
+
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Margin" Value="0,2,8,10"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Padding" Value="6,5"/>
+            <Setter Property="Margin" Value="0,2,8,10"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="18,7"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+        <Style x:Key="Kartu" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#DDE2E8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#5A6570"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style x:Key="Angka" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Judul -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Data Mahasiswa" FontSize="24" FontWeight="SemiBold"/>
+            <TextBlock Text="Klik baris pada tabel untuk mengubah atau menghapus data."
+                       Style="{StaticResource Label}"/>
+        </StackPanel>
+
+        <!-- Form + statistik -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Kartu}">
+                <StackPanel>
+                    <UniformGrid Columns="2">
+                        <StackPanel>
+                            <TextBlock Text="NIM" Style="{StaticResource Label}"/>
+                            <TextBox Text="{Binding Nim, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Nama lengkap" Style="{StaticResource Label}"/>
+                            <TextBox Text="{Binding Nama, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Jurusan" Style="{StaticResource Label}"/>
+                            <ComboBox ItemsSource="{Binding PilihanJurusan}"
+                                      SelectedItem="{Binding Jurusan}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Gender" Style="{StaticResource Label}"/>
+                            <ComboBox ItemsSource="{Binding PilihanGender}"
+                                      SelectedItem="{Binding Gender}"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Email" Style="{StaticResource Label}"/>
+                            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </UniformGrid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <Button Content="{Binding TeksSimpan}" Command="{Binding SimpanCommand}"
+                                Background="#1E6FD9" Foreground="White"/>
+                        <Button Content="Hapus" Command="{Binding HapusCommand}"/>
+                        <Button Content="Reset" Command="{Binding ResetCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource Kartu}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.ColumnSpan="2" Text="Ringkasan" FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+
+                    <TextBlock Grid.Row="1" Text="Total mahasiswa" Style="{StaticResource Label}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Total}" Style="{StaticResource Angka}"/>
+
+                    <TextBlock Grid.Row="2" Text="Informatika" Style="{StaticResource Label}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding JumlahInformatika}" Style="{StaticResource Angka}"/>
+
+                    <TextBlock Grid.Row="3" Text="Sistem Informasi" Style="{StaticResource Label}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding JumlahSistemInformasi}" Style="{StaticResource Angka}"/>
+
+                    <TextBlock Grid.Row="4" Text="Laki-laki" Style="{StaticResource Label}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding JumlahLaki}" Style="{StaticResource Angka}"/>
+
+                    <TextBlock Grid.Row="5" Text="Perempuan" Style="{StaticResource Label}"/>
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding JumlahPerempuan}" Style="{StaticResource Angka}"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Pencarian -->
+        <Grid Grid.Row="2" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding KataKunci, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,8,0" ToolTip="Cari berdasarkan NIM, nama, atau jurusan">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding CariCommand}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+            <Button Grid.Column="1" Content="Cari" Command="{Binding CariCommand}" Margin="0"/>
+        </Grid>
+
+        <!-- Tabel -->
+        <DataGrid Grid.Row="3"
+                  ItemsSource="{Binding Daftar}"
+                  SelectedItem="{Binding Dipilih, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  RowHeight="30"
+                  Background="White">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="NIM" Binding="{Binding Nim}" Width="100"/>
+                <DataGridTextColumn Header="Nama" Binding="{Binding Nama}" Width="*"/>
+                <DataGridTextColumn Header="Jurusan" Binding="{Binding Jurusan}" Width="160"/>
+                <DataGridTextColumn Header="Gender" Binding="{Binding Gender}" Width="100"/>
+                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Pesan status -->
+        <TextBlock Grid.Row="4" Text="{Binding Pesan}" Margin="0,10,0,0"
+                   Foreground="#3B4652"/>
+    </Grid>
+</Window>

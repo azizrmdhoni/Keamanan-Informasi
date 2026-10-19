@@ -1,0 +1,15 @@
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\bin\Debug\net10.0\HelloWord.exe
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\bin\Debug\net10.0\HelloWord.deps.json
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\bin\Debug\net10.0\HelloWord.runtimeconfig.json
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\bin\Debug\net10.0\HelloWord.dll
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\bin\Debug\net10.0\HelloWord.pdb
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.AssemblyInfoInputs.cache
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.AssemblyInfo.cs
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.csproj.CoreCompileInputs.cache
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.sourcelink.json
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.dll
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\refint\HelloWord.dll
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.pdb
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\HelloWord.genruntimeconfig.cache
+C:\Users\sn-py\OneDrive\Documents\PBKK D\Week2\HelloWord\obj\Debug\net10.0\ref\HelloWord.dll
