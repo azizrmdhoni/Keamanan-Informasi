@@ -289,3 +289,41 @@ pilihan = input("Jalankan sebagai (1/2/3): ")
 
 if pilihan == "1":
     jalankan_kdc()
+
+def jalankan_bob():
+    server = socket.socket()
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(("0.0.0.0", 6000))
+    server.listen()
+
+    while True:
+        kb = input("\nMaster key Bob (Kb): ")
+        print("Bob menunggu Alice...")
+        sock, addr = server.accept()
+        f = sock.makefile()
+        try:
+            # langkah 3: terima E(Kb,[Ks||IDA]) dari Alice
+            paket_b = f.readline().strip()
+            isi = aes_decrypt(paket_b, kb).split("|")
+            ks = isi[0]
+            ida = isi[1]
+            print("(3) dari", ida, ", Session key Ks =", ks)
+
+            # langkah 4: kirim E(Ks,N2)
+            n2 = random.randint(1000, 9999)
+            sock.sendall((aes_encrypt(str(n2), ks) + "\n").encode())
+            print("(4) kirim E(Ks,N2), N2 =", n2)
+
+            # langkah 5: terima E(Ks,f(N2)), cek apakah N2 + 1
+            jawaban = int(aes_decrypt(f.readline().strip(), ks))
+            if jawaban != n2 + 1:
+                print("f(N2) salah!")
+                sock.close()
+                continue
+            print("(5) valid")
+        except:
+            print("Gagal, cek key")
+            sock.close()
+            continue
+
+        mulai_chat(sock, f, ks, "Alice")
