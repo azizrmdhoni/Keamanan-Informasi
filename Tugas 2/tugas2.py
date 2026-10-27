@@ -101,3 +101,26 @@ def aes_decrypt(hex_teks, key):      # HEX menjadi ASCII
     for i in range(0, len(data), 16):
         hasil += dec_blok(data[i:i + 16], rk)
     return bytes(hasil).rstrip(b'\0').decode('ascii', errors='replace')
+
+def chat(sock, f, ks, nama_lawan):
+    tutup = []
+
+    def terima():                    # thread penerima
+        for baris in f:
+            c = baris.strip()
+            print(f"\n[{nama_lawan}] ciphertext (hex): {c}")
+            print(f"[{nama_lawan}] plaintext        : {aes_decrypt(c, ks)}")
+        tutup.append(1)
+        print("\nKoneksi ditutup, tekan Enter.")
+
+    threading.Thread(target=terima, daemon=True).start()
+    print("Chat dimulai ketik pesan (atau /exit untuk ganti key).")
+    while True:                      # pengirim
+        teks = input()
+        if teks == "/exit" or tutup:
+            break
+        if teks:
+            c = aes_encrypt(teks, ks)
+            print("ciphertext (hex):", c)
+            sock.sendall((c + "\n").encode())
+    sock.close()
