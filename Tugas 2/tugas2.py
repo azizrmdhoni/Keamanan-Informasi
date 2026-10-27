@@ -1,4 +1,6 @@
 import threading
+import socket
+import random
 
 SBOX = [
     0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
@@ -237,3 +239,53 @@ def mulai_chat(sock, f, ks, nama_lawan):
             print("ciphertext (hex):", cipher)
             sock.sendall((cipher + "\n").encode())
     sock.close()
+    
+def jalankan_kdc():
+  server = socket.socket()
+  server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  server.bind(("0.0.0.0", 5000))
+  server.listen()
+  server.settimeout(1)
+
+  huruf = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+  while True:
+    ka = input("\nMaster key Alice (Ka): ")
+    kb = input("Master key Bob (Kb): ")
+    print("KDC menunggu Alice...")
+    while True:
+      try:
+        conn, addr = server.accept()
+        break
+
+      except socket.timeout:
+        pass
+    conn.settimeout(None)
+
+    # langkah 1: terima IDA || IDB || N1
+    data = conn.makefile().readline().strip()
+    bagian = data.split("|")
+    ida = bagian[0]
+    idb = bagian[1]
+    n1 = bagian[2]
+    print("(1) dari", addr[0], ":", data)
+
+    # buat session key Ks (16 karakter acak)
+    ks = ""
+    for i in range(16):
+        ks = ks + random.choice(huruf)
+
+    # langkah 2: kirim E(Ka,[Ks||IDA||IDB||N1]) || E(Kb,[Ks||IDA])
+    paket_a = aes_encrypt(ks + "|" + ida + "|" + idb + "|" + n1, ka)
+    paket_b = aes_encrypt(ks + "|" + ida, kb)
+    print("(2) Ks =", ks)
+    print("    E(Ka) =", paket_a)
+    print("    E(Kb) =", paket_b)
+    conn.sendall((paket_a + "|" + paket_b + "\n").encode())
+    conn.close()
+
+print("1. KDC")
+pilihan = input("Jalankan sebagai (1/2/3): ")
+
+if pilihan == "1":
+    jalankan_kdc()
