@@ -245,6 +245,7 @@ def aes_decrypt(hex_teks, key_teks):
     return teks
 
 tutup = False
+keluar = False     # True kalau kita sendiri yang menutup chat (/exit)
 
 def terima_pesan(f, ks, nama_lawan):
     global tutup
@@ -257,11 +258,13 @@ def terima_pesan(f, ks, nama_lawan):
         print("\n[" + nama_lawan + "] ciphertext (hex):", cipher)
         print("[" + nama_lawan + "] plaintext        :", plain)
     tutup = True
-    print("\nKoneksi ditutup, tekan Enter")
+    if not keluar:
+        print("\nKoneksi ditutup, tekan Enter")
 
 def mulai_chat(sock, f, ks, nama_lawan):
-    global tutup
+    global tutup, keluar
     tutup = False
+    keluar = False
     t = threading.Thread(target=terima_pesan, args=(f, ks, nama_lawan), daemon=True)
     t.start()
 
@@ -274,6 +277,16 @@ def mulai_chat(sock, f, ks, nama_lawan):
             cipher = aes_encrypt(pesan, ks)
             print("ciphertext (hex):", cipher)
             sock.sendall((cipher + "\n").encode())
+
+    # tutup koneksi dengan benar: sock.close() saja tidak cukup karena
+    # f (makefile) masih memegang socket, jadi lawan tidak pernah menerima EOF
+    keluar = True
+    try:
+        sock.shutdown(socket.SHUT_RDWR)
+    except OSError:
+        pass
+    t.join(2)
+    f.close()
     sock.close()
     
 def jalankan_kdc():
@@ -319,7 +332,6 @@ def jalankan_kdc():
     conn.sendall((paket_a + "|" + paket_b + "\n").encode())
     conn.close()
 
-# alice
 def jalankan_alice():
     ip_kdc = input("IP KDC: ")
     ip_bob = input("IP Bob: ")
