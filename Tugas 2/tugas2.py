@@ -198,8 +198,40 @@ def aes_decrypt(hex_teks, key_teks):
  
     while len(hasil) > 0 and hasil[-1] == 0:    # buang padding 0
         hasil.pop()
- 
+
     teks = ""
     for b in hasil:
         teks = teks + chr(b)
     return teks
+
+tutup = False
+
+def terima_pesan(f, ks, nama_lawan):
+    global tutup
+    for baris in f:
+        cipher = baris.strip()
+        try:
+            plain = aes_decrypt(cipher, ks)
+        except:
+            plain = "(gagal dekrip)"
+        print("\n[" + nama_lawan + "] ciphertext (hex):", cipher)
+        print("[" + nama_lawan + "] plaintext        :", plain)
+    tutup = True
+    print("\nKoneksi ditutup, tekan Enter")
+
+def mulai_chat(sock, f, ks, nama_lawan):
+    global tutup
+    tutup = False
+    t = threading.Thread(target=terima_pesan, args=(f, ks, nama_lawan), daemon=True)
+    t.start()
+
+    print("Chat dimulai ketik pesan atau /exit untuk ganti key")
+    while True:
+        pesan = input()
+        if pesan == "/exit" or tutup == True:
+            break
+        if pesan != "":
+            cipher = aes_encrypt(pesan, ks)
+            print("ciphertext (hex):", cipher)
+            sock.sendall((cipher + "\n").encode())
+    sock.close()
