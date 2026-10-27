@@ -281,6 +281,7 @@ def jalankan_kdc():
   server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   server.bind(("0.0.0.0", 5000))
   server.listen()
+  server.settimeout(1)
 
   huruf = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -288,7 +289,13 @@ def jalankan_kdc():
     ka = input("\nMaster key Alice (Ka): ")
     kb = input("Master key Bob (Kb): ")
     print("KDC menunggu Alice")
-    conn, addr = server.accept()
+    while True:
+      try:
+        conn, addr = server.accept()
+        break
+      except socket.timeout:
+        pass
+    conn.settimeout(None)
 
     # langkah 1: terima IDA || IDB || N1
     data = conn.makefile().readline().strip()
@@ -322,7 +329,7 @@ def jalankan_alice():
         try:
             # langkah 1: kirim IDA || IDB || N1 ke KDC
             n1 = str(random.randint(1000, 9999))
-            k = socket.create_connection((ip_kdc, 5000))
+            k = socket.create_connection((ip_kdc, 5000), timeout=5)
             k.sendall(("Alice|Bob|" + n1 + "\n").encode())
             print("(1) kirim ke KDC: Alice|Bob|" + n1)
 
@@ -341,7 +348,7 @@ def jalankan_alice():
             print("Session key Ks =", ks)
 
             # langkah 3: kirim E(Kb,[Ks||IDA]) ke Bob
-            bob = socket.create_connection((ip_bob, 6000))
+            bob = socket.create_connection((ip_bob, 6000), timeout=5)
             f = bob.makefile()
             bob.sendall((paket_b + "\n").encode())
             print("(3) kirim ke Bob:", paket_b)
@@ -353,7 +360,8 @@ def jalankan_alice():
             # langkah 5: kirim E(Ks,f(N2)), f(N2) = N2 + 1
             bob.sendall((aes_encrypt(str(n2 + 1), ks) + "\n").encode())
             print("(5) kirim E(Ks, N2+1)")
-        except:
+            bob.settimeout(None)
+        except Exception:
             print("Gagal, cek key atau koneksi")
             continue
 
@@ -364,11 +372,18 @@ def jalankan_bob():
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("0.0.0.0", 6000))
     server.listen()
+    server.settimeout(1)
 
     while True:
         kb = input("\nMaster key Bob (Kb): ")
         print("Bob menunggu Alice")
-        sock, addr = server.accept()
+        while True:
+            try:
+                sock, _ = server.accept()
+                break
+            except socket.timeout:
+                pass
+        sock.settimeout(None)
         f = sock.makefile()
         try:
             # langkah 3: terima E(Kb,[Ks||IDA]) dari Alice
@@ -390,7 +405,7 @@ def jalankan_bob():
                 sock.close()
                 continue
             print("(5) valid")
-        except:
+        except Exception:
             print("Gagal, cek key")
             sock.close()
             continue
