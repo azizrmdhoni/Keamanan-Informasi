@@ -21,14 +21,14 @@ SBOX = [
     0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf,
     0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16,
 ]
- 
+
 # inverse S-box dibuat dari S-box (untuk dekrip)
 INV_SBOX = [0] * 256
 for i in range(256):
     INV_SBOX[SBOX[i]] = i
- 
+
 RCON = [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36]
- 
+
 # perkalian di GF(2^8)
 def kali(a, b):
     hasil = 0
@@ -48,8 +48,7 @@ def blok_ke_matrix(blok):
         for c in range(4):
             state[r][c] = blok[r + 4 * c]
     return state
- 
- 
+
 # ubah matriks 4x4 jadi 16 byte lagi
 def matrix_ke_blok(state):
     blok = []
@@ -63,21 +62,21 @@ def sub_bytes(state):
     for r in range(4):
         for c in range(4):
             state[r][c] = SBOX[state[r][c]]
-  
+
 def inv_sub_bytes(state):
     for r in range(4):
         for c in range(4):
             state[r][c] = INV_SBOX[state[r][c]]
- 
+
 # 2. Shift Rows (baris ke-r geser kiri r kali)
 def shift_rows(state):
     for r in range(1, 4):
         state[r] = state[r][r:] + state[r][:r]
- 
+
 def inv_shift_rows(state):
     for r in range(1, 4):
         state[r] = state[r][-r:] + state[r][:-r]
- 
+
 # 3. Mix Columns
 def mix_columns(state):
     for c in range(4):
@@ -89,7 +88,7 @@ def mix_columns(state):
         state[1][c] = a0 ^ kali(2, a1) ^ kali(3, a2) ^ a3
         state[2][c] = a0 ^ a1 ^ kali(2, a2) ^ kali(3, a3)
         state[3][c] = kali(3, a0) ^ a1 ^ a2 ^ kali(2, a3)
- 
+
 def inv_mix_columns(state):
     for c in range(4):
         a0 = state[0][c]
@@ -100,7 +99,7 @@ def inv_mix_columns(state):
         state[1][c] = kali(9, a0) ^ kali(14, a1) ^ kali(11, a2) ^ kali(13, a3)
         state[2][c] = kali(13, a0) ^ kali(9, a1) ^ kali(14, a2) ^ kali(11, a3)
         state[3][c] = kali(11, a0) ^ kali(13, a1) ^ kali(9, a2) ^ kali(14, a3)
- 
+
 # 4. Add Round Key (XOR state dengan round key)
 def add_round_key(state, round_key):
     for r in range(4):
@@ -112,7 +111,7 @@ def key_expansion(key):
     w = []
     for i in range(4):
         w.append([key[4 * i], key[4 * i + 1], key[4 * i + 2], key[4 * i + 3]])
- 
+
     for i in range(4, 44):
         temp = w[i - 1][:]
         if i % 4 == 0:
@@ -124,7 +123,7 @@ def key_expansion(key):
         for j in range(4):
             baru.append(w[i - 4][j] ^ temp[j])
         w.append(baru)
-      
+
     round_keys = []
     for ronde in range(11):
         rk = [[0] * 4 for i in range(4)]
@@ -133,7 +132,7 @@ def key_expansion(key):
                 rk[r][c] = w[4 * ronde + c][r]
         round_keys.append(rk)
     return round_keys
- 
+
 # enkripsi 1 blok (16 byte)
 def enkripsi_blok(blok, round_keys):
     state = blok_ke_matrix(blok)
@@ -147,7 +146,7 @@ def enkripsi_blok(blok, round_keys):
     shift_rows(state)
     add_round_key(state, round_keys[10])
     return matrix_ke_blok(state)
- 
+
 # dekripsi 1 blok (16 byte)
 def dekripsi_blok(blok, round_keys):
     state = blok_ke_matrix(blok)
@@ -161,7 +160,7 @@ def dekripsi_blok(blok, round_keys):
     inv_sub_bytes(state)
     add_round_key(state, round_keys[0])
     return matrix_ke_blok(state)
- 
+
 # key teks dibuat 16 karakter (jika kurang akan ditambah '0', sedangkan lebih akan dipotong)
 def siapkan_key(key_teks):
     while len(key_teks) < 16:
@@ -179,8 +178,6 @@ def xor_blok(a, b):
         hasil.append(a[i] ^ b[i])
     return hasil
 
-MODE = "CBC"
-
 # plaintext (ASCII) menajadi ciphertext (HEX)
 def aes_encrypt(plaintext, key_teks):
     round_keys = key_expansion(siapkan_key(key_teks))
@@ -189,7 +186,7 @@ def aes_encrypt(plaintext, key_teks):
         data.append(ord(ch))
     while len(data) % 16 != 0:      # padding 0 sampai kelipatan 16
         data.append(0)
-      
+
     hasil = []
     if MODE == "ECB":
         for i in range(0, len(data), 16):
@@ -204,12 +201,12 @@ def aes_encrypt(plaintext, key_teks):
             cipher = enkripsi_blok(blok, round_keys)
             hasil = hasil + cipher
             sebelumnya = cipher
- 
+
     hex_teks = ""
     for b in hasil:
         hex_teks = hex_teks + "%02x" % b
     return hex_teks
- 
+
 # ciphertext (HEX) menajadi plaintext (ASCII)
 def aes_decrypt(hex_teks, key_teks):
     round_keys = key_expansion(siapkan_key(key_teks))
@@ -219,7 +216,7 @@ def aes_decrypt(hex_teks, key_teks):
 
     if len(data) == 0 or len(data) % 16 != 0:
         raise ValueError("ciphertext tidak valid")
- 
+
     hasil = []
     if MODE == "ECB":
         for i in range(0, len(data), 16):
@@ -235,7 +232,7 @@ def aes_decrypt(hex_teks, key_teks):
             blok = dekripsi_blok(cipher, round_keys)
             hasil = hasil + xor_blok(blok, sebelumnya)    # CBC: XOR setelah dekripsi
             sebelumnya = cipher
- 
+
     while len(hasil) > 0 and hasil[-1] == 0:    # buang padding 0
         hasil.pop()
 
@@ -245,7 +242,6 @@ def aes_decrypt(hex_teks, key_teks):
     return teks
 
 tutup = False
-keluar = False     # True kalau kita sendiri yang menutup chat (/exit)
 
 def terima_pesan(f, ks, nama_lawan):
     global tutup
@@ -258,13 +254,11 @@ def terima_pesan(f, ks, nama_lawan):
         print("\n[" + nama_lawan + "] ciphertext (hex):", cipher)
         print("[" + nama_lawan + "] plaintext        :", plain)
     tutup = True
-    if not keluar:
-        print("\nKoneksi ditutup, tekan Enter")
+    print("\nKoneksi ditutup, tekan Enter")
 
 def mulai_chat(sock, f, ks, nama_lawan):
-    global tutup, keluar
+    global tutup
     tutup = False
-    keluar = False
     t = threading.Thread(target=terima_pesan, args=(f, ks, nama_lawan), daemon=True)
     t.start()
 
@@ -277,24 +271,13 @@ def mulai_chat(sock, f, ks, nama_lawan):
             cipher = aes_encrypt(pesan, ks)
             print("ciphertext (hex):", cipher)
             sock.sendall((cipher + "\n").encode())
-
-    # tutup koneksi dengan benar: sock.close() saja tidak cukup karena
-    # f (makefile) masih memegang socket, jadi lawan tidak pernah menerima EOF
-    keluar = True
-    try:
-        sock.shutdown(socket.SHUT_RDWR)
-    except OSError:
-        pass
-    t.join(2)
-    f.close()
     sock.close()
-    
+
 def jalankan_kdc():
   server = socket.socket()
   server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   server.bind(("0.0.0.0", 5000))
   server.listen()
-  server.settimeout(1)
 
   huruf = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -302,13 +285,7 @@ def jalankan_kdc():
     ka = input("\nMaster key Alice (Ka): ")
     kb = input("Master key Bob (Kb): ")
     print("KDC menunggu Alice")
-    while True:
-      try:
-        conn, addr = server.accept()
-        break
-      except socket.timeout:
-        pass
-    conn.settimeout(None)
+    conn, addr = server.accept()
 
     # langkah 1: terima IDA || IDB || N1
     data = conn.makefile().readline().strip()
@@ -341,7 +318,7 @@ def jalankan_alice():
         try:
             # langkah 1: kirim IDA || IDB || N1 ke KDC
             n1 = str(random.randint(1000, 9999))
-            k = socket.create_connection((ip_kdc, 5000), timeout=5)
+            k = socket.create_connection((ip_kdc, 5000))
             k.sendall(("Alice|Bob|" + n1 + "\n").encode())
             print("(1) kirim ke KDC: Alice|Bob|" + n1)
 
@@ -360,7 +337,7 @@ def jalankan_alice():
             print("Session key Ks =", ks)
 
             # langkah 3: kirim E(Kb,[Ks||IDA]) ke Bob
-            bob = socket.create_connection((ip_bob, 6000), timeout=5)
+            bob = socket.create_connection((ip_bob, 6000))
             f = bob.makefile()
             bob.sendall((paket_b + "\n").encode())
             print("(3) kirim ke Bob:", paket_b)
@@ -372,8 +349,7 @@ def jalankan_alice():
             # langkah 5: kirim E(Ks,f(N2)), f(N2) = N2 + 1
             bob.sendall((aes_encrypt(str(n2 + 1), ks) + "\n").encode())
             print("(5) kirim E(Ks, N2+1)")
-            bob.settimeout(None)
-        except Exception:
+        except:
             print("Gagal, cek key atau koneksi")
             continue
 
@@ -384,18 +360,11 @@ def jalankan_bob():
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("0.0.0.0", 6000))
     server.listen()
-    server.settimeout(1)
 
     while True:
         kb = input("\nMaster key Bob (Kb): ")
         print("Bob menunggu Alice")
-        while True:
-            try:
-                sock, _ = server.accept()
-                break
-            except socket.timeout:
-                pass
-        sock.settimeout(None)
+        sock, _ = server.accept()
         f = sock.makefile()
         try:
             # langkah 3: terima E(Kb,[Ks||IDA]) dari Alice
@@ -417,7 +386,7 @@ def jalankan_bob():
                 sock.close()
                 continue
             print("(5) valid")
-        except Exception:
+        except:
             print("Gagal, cek key")
             sock.close()
             continue
