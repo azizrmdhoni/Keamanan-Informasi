@@ -313,6 +313,51 @@ def jalankan_kdc():
     conn.close()
 
 # alice
+def jalankan_alice():
+    ip_kdc = input("IP KDC: ")
+    ip_bob = input("IP Bob: ")
+
+    while True:
+        ka = input("\nMaster key Alice (Ka): ")
+        try:
+            # langkah 1: kirim IDA || IDB || N1 ke KDC
+            n1 = str(random.randint(1000, 9999))
+            k = socket.create_connection((ip_kdc, 5000))
+            k.sendall(("Alice|Bob|" + n1 + "\n").encode())
+            print("(1) kirim ke KDC: Alice|Bob|" + n1)
+
+            # langkah 2: terima dari KDC
+            balasan = k.makefile().readline().strip()
+            k.close()
+            print("(2) dari KDC:", balasan)
+            paket_a, paket_b = balasan.split("|")
+
+            isi = aes_decrypt(paket_a, ka).split("|")
+            ks = isi[0]
+            n1_kdc = isi[3]
+            if n1_kdc != n1:
+                print("N1 tidak cocok!")
+                continue
+            print("Session key Ks =", ks)
+
+            # langkah 3: kirim E(Kb,[Ks||IDA]) ke Bob
+            bob = socket.create_connection((ip_bob, 6000))
+            f = bob.makefile()
+            bob.sendall((paket_b + "\n").encode())
+            print("(3) kirim ke Bob:", paket_b)
+
+            # langkah 4: terima E(Ks,N2) dari Bob
+            n2 = int(aes_decrypt(f.readline().strip(), ks))
+            print("(4) N2 dari Bob =", n2)
+
+            # langkah 5: kirim E(Ks,f(N2)), f(N2) = N2 + 1
+            bob.sendall((aes_encrypt(str(n2 + 1), ks) + "\n").encode())
+            print("(5) kirim E(Ks, N2+1)")
+        except:
+            print("Gagal, cek key atau koneksi")
+            continue
+
+        mulai_chat(bob, f, ks, "Bob")
 
 def jalankan_bob():
     server = socket.socket()
