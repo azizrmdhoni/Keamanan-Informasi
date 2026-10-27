@@ -1,6 +1,7 @@
 import threading
 import socket
 import random
+import os
 
 SBOX = [
     0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
@@ -170,7 +171,16 @@ def siapkan_key(key_teks):
     for ch in key_teks:
         key.append(ord(ch))
     return key
- 
+
+# XOR dua list byte
+def xor_blok(a, b):
+    hasil = []
+    for i in range(len(a)):
+        hasil.append(a[i] ^ b[i])
+    return hasil
+
+MODE = "CBC"
+
 # plaintext (ASCII) menajadi ciphertext (HEX)
 def aes_encrypt(plaintext, key_teks):
     round_keys = key_expansion(siapkan_key(key_teks))
@@ -181,8 +191,19 @@ def aes_encrypt(plaintext, key_teks):
         data.append(0)
       
     hasil = []
-    for i in range(0, len(data), 16):
-        hasil = hasil + enkripsi_blok(data[i:i + 16], round_keys)
+    if MODE == "ECB":
+        for i in range(0, len(data), 16):
+            hasil = hasil + enkripsi_blok(data[i:i + 16], round_keys)
+    else:
+        # IV acak 16 byte dibuat baru untuk setiap pesan
+        iv = list(os.urandom(16))
+        hasil = iv[:]
+        sebelumnya = iv
+        for i in range(0, len(data), 16):
+            blok = xor_blok(data[i:i + 16], sebelumnya)   # CBC: XOR dulu
+            cipher = enkripsi_blok(blok, round_keys)
+            hasil = hasil + cipher
+            sebelumnya = cipher
  
     hex_teks = ""
     for b in hasil:
@@ -195,10 +216,25 @@ def aes_decrypt(hex_teks, key_teks):
     data = []
     for i in range(0, len(hex_teks), 2):
         data.append(int(hex_teks[i:i + 2], 16))
+
+    if len(data) == 0 or len(data) % 16 != 0:
+        raise ValueError("ciphertext tidak valid")
  
     hasil = []
-    for i in range(0, len(data), 16):
-        hasil = hasil + dekripsi_blok(data[i:i + 16], round_keys)
+    if MODE == "ECB":
+        for i in range(0, len(data), 16):
+            hasil = hasil + dekripsi_blok(data[i:i + 16], round_keys)
+    else:
+        if len(data) < 32:
+            raise ValueError("ciphertext tidak valid")
+        iv = data[:16]            # 16 byte pertama adalah IV
+        data = data[16:]
+        sebelumnya = iv
+        for i in range(0, len(data), 16):
+            cipher = data[i:i + 16]
+            blok = dekripsi_blok(cipher, round_keys)
+            hasil = hasil + xor_blok(blok, sebelumnya)    # CBC: XOR setelah dekripsi
+            sebelumnya = cipher
  
     while len(hasil) > 0 and hasil[-1] == 0:    # buang padding 0
         hasil.pop()
@@ -245,22 +281,14 @@ def jalankan_kdc():
   server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   server.bind(("0.0.0.0", 5000))
   server.listen()
-  server.settimeout(1)
 
   huruf = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
   while True:
     ka = input("\nMaster key Alice (Ka): ")
     kb = input("Master key Bob (Kb): ")
-    print("KDC menunggu Alice...")
-    while True:
-      try:
-        conn, addr = server.accept()
-        break
-
-      except socket.timeout:
-        pass
-    conn.settimeout(None)
+    print("KDC menunggu Alice")
+    conn, addr = server.accept()
 
     # langkah 1: terima IDA || IDB || N1
     data = conn.makefile().readline().strip()
@@ -284,11 +312,7 @@ def jalankan_kdc():
     conn.sendall((paket_a + "|" + paket_b + "\n").encode())
     conn.close()
 
-print("1. KDC")
-pilihan = input("Jalankan sebagai (1/2/3): ")
-
-if pilihan == "1":
-    jalankan_kdc()
+# alice
 
 def jalankan_bob():
     server = socket.socket()
@@ -298,7 +322,7 @@ def jalankan_bob():
 
     while True:
         kb = input("\nMaster key Bob (Kb): ")
-        print("Bob menunggu Alice...")
+        print("Bob menunggu Alice")
         sock, addr = server.accept()
         f = sock.makefile()
         try:
@@ -314,7 +338,7 @@ def jalankan_bob():
             sock.sendall((aes_encrypt(str(n2), ks) + "\n").encode())
             print("(4) kirim E(Ks,N2), N2 =", n2)
 
-            # langkah 5: terima E(Ks,f(N2)), cek apakah N2 + 1
+            # langkah 5: terima E(Ks,f(N2)) cek apakah N2 + 1
             jawaban = int(aes_decrypt(f.readline().strip(), ks))
             if jawaban != n2 + 1:
                 print("f(N2) salah!")
@@ -327,3 +351,25 @@ def jalankan_bob():
             continue
 
         mulai_chat(sock, f, ks, "Alice")
+
+print("1. KDC")
+print("2. Bob")
+print("3. Alice")
+pilihan = input("Jalankan sebagai (1/2/3): ")
+
+print("\nMode AES:")
+print("1. ECB")
+print("2. CBC")
+pilih_mode = input("Pilih mode (1/2, harus sama di KDC, Bob, dan Alice): ")
+if pilih_mode == "1":
+    MODE = "ECB"
+else:
+    MODE = "CBC"
+print("Mode AES:", MODE)
+
+if pilihan == "1":
+    jalankan_kdc()
+elif pilihan == "2":
+    jalankan_bob()
+elif pilihan == "3":
+    jalankan_alice()
